@@ -92,13 +92,13 @@ ocw
 
 opencode takes the left 70%, watchdog logs take the right 30%. opencode is focused by default — you work normally and the watchdog runs silently in the background.
 
-**Stop everything cleanly:**
+## Stopping
 
-```bash
-ocw stop
-```
+From inside the tmux session:
+- `Ctrl+b` then `:kill-session` — kills opencode + watchdog together
 
-No `Ctrl+C`, no `tmux kill-server`. Just `ocw stop` from any terminal.
+From another terminal:
+- `ocw stop`
 
 **With options:**
 
