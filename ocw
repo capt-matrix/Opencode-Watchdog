@@ -1,0 +1,53 @@
+#!/bin/bash
+# ocw — launch opencode + watchdog side by side, clean exit on q
+
+SESSION="oc"
+WATCHDOG="$HOME/.local/bin/oc_watchdog.py"
+COOLDOWN="${OCW_COOLDOWN:-8}"
+THRESH="${OCW_THRESH:-4}"
+MSG=""
+
+# ── Parse args ────────────────────────────────────────────────────────────────
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        stop|quit|kill) ACTION="stop"; shift ;;
+        --cooldown) COOLDOWN="$2"; shift 2 ;;
+        --thresh)   THRESH="$2";   shift 2 ;;
+        --msg)      MSG="$2";      shift 2 ;;
+        --session)  SESSION="$2";  shift 2 ;;
+        *) shift ;;
+    esac
+done
+
+# Build extra args string for watchdog
+EXTRA_ARGS="--cooldown $COOLDOWN --thresh $THRESH"
+[[ -n "$MSG" ]] && EXTRA_ARGS="$EXTRA_ARGS --msg '$MSG'"
+
+# ── Quit mode ─────────────────────────────────────────────────────────────────
+if [[ "$ACTION" == "stop" ]]; then
+    tmux kill-session -t "$SESSION" 2>/dev/null && echo "✓ Killed session '$SESSION'" || echo "No session '$SESSION' found"
+    exit 0
+fi
+
+# ── Already running? ──────────────────────────────────────────────────────────
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    echo "Session '$SESSION' already running. Attaching..."
+    tmux attach-session -t "$SESSION"
+    exit 0
+fi
+
+# ── Launch ────────────────────────────────────────────────────────────────────
+# Left pane: opencode
+tmux new-session -d -s "$SESSION" -x "$(tput cols)" -y "$(tput lines)"
+tmux send-keys -t "$SESSION:0" "opencode . -c" Enter
+
+# Right pane: watchdog (30% width)
+tmux split-window -h -p 30 -t "$SESSION:0"
+tmux send-keys -t "$SESSION:0.1" \
+    "python3 $WATCHDOG $SESSION 0 $EXTRA_ARGS" Enter
+
+# Focus left pane (opencode)
+tmux select-pane -t "$SESSION:0.0"
+
+# Attach
+tmux attach-session -t "$SESSION"
