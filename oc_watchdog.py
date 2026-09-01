@@ -124,8 +124,13 @@ def input_listener():
 
         line = line.strip()
 
-        if line.lower() in ('quit', 'exit', 'q'):
-            print("[watchdog] Quitting...")
+        if line.lower() == 'exit':
+            print("[watchdog] Stopping watchdog...")
+            sys.exit(0)
+
+        if line.lower() == 'quit':
+            print("[watchdog] Killing session...")
+            subprocess.run(["tmux", "kill-server"])
             sys.exit(0)
 
         if line.lower().startswith('add:'):
