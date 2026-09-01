@@ -152,9 +152,24 @@ If you omit session/pane it auto-picks the first active tmux session.
 
 ---
 
+## Switching panes
+
+```
+Ctrl+b →    move to watchdog pane (right)
+Ctrl+b ←    move back to opencode (left)
+```
+
+Or enable mouse mode to click between panes (add once to `~/.tmux.conf`):
+
+```bash
+echo "set -g mouse on" >> ~/.tmux.conf && tmux source ~/.tmux.conf
+```
+
+---
+
 ## Watchdog controls (while running)
 
-With the watchdog active in the right pane, you can interact with it live:
+Switch to the watchdog pane first (`Ctrl+b →`), then:
 
 | What you type | What happens |
 |---|---|
@@ -162,7 +177,8 @@ With the watchdog active in the right pane, you can interact with it live:
 | Enter (empty, while paused) | Resumes monitoring |
 | A message + Enter (while paused) | Injects that message into opencode, then resumes |
 | `add: let me think` | Adds `let me think` as a new loop trigger phrase |
-| `quit` / `exit` / `q` | Stops the watchdog cleanly |
+| `exit` | Stops the watchdog only, opencode keeps running |
+| `quit` | Kills the entire tmux session (opencode + watchdog) |
 
 ---
 
@@ -203,6 +219,6 @@ oc_watchdog.py   — the watchdog (Python 3, stdlib only)
 ocw              — launcher script (bash)
 ```
 
-No external Python packages required.
+No external Python packages required
 
 ---
